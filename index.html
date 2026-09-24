@@ -144,7 +144,7 @@ main > section{ padding:40px var(--pad) calc(70px + env(safe-area-inset-bottom,0
     <p id="inquiry-sent" hidden style="text-align:center;font-size:.9rem;">Thanks — I'll be in touch shortly.</p>
     <div class="how">
       <h2 class="how-title">How it works</h2>
-      <div class="step"><span class="num">01</span><div><p class="step-title">Send a photograph</p><p class="step-desc">A clear, well-lit photo of your pet, subject, or place.</p></div></div>
+      <div class="step"><span class="num">01</span><div><p class="step-title">Send a photo</p><p class="step-desc">A few clear, well-lit photo of your pet, subject, or place.</p></div></div>
       <div class="step"><span class="num">02</span><div><p class="step-title">Agree on the details</p><p class="step-desc">We settle on size, framing, and a timeline together.</p></div></div>
       <div class="step"><span class="num">03</span><div><p class="step-title">I paint it</p><p class="step-desc">Hand-painted in oil, start to finish, in the studio.</p></div></div>
       <div class="step"><span class="num">04</span><div><p class="step-title">Receive the finished painting</p><p class="step-desc">Carefully packaged and shipped to your door.</p></div></div>
@@ -152,9 +152,9 @@ main > section{ padding:40px var(--pad) calc(70px + env(safe-area-inset-bottom,0
   </section>
 
   <section id="contact" hidden>
-    <p><a href="tel:+420000000000">+420 000 000 000</a></p>
-    <p><a href="mailto:hello@jakubpustay.com">hello@jakubpustay.com</a></p>
-    <p><a class="ig-link" href="https://instagram.com/jakubpustay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.3" cy="6.7" r="1"/></svg>@jakubpustay</a></p>
+    <p><a href="tel:+420000000000">+420 777 126 358</a></p>
+    <p><a href="mailto:hello@jakubpustay.com">pustay.jakub@gmail.com</a></p>
+    <p><a class="ig-link" href="https://www.instagram.com/nekreativni_kreatura_"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.3" cy="6.7" r="1"/></svg>@jakubpustay</a></p>
   </section>
 </main>
 
@@ -191,10 +191,10 @@ document.addEventListener("touchend", e => {
 
 // ---------- CONFIG (edit prices here) ----------
 const CONFIG = {
-  email: "hello@jakubpustay.com",
+  email: "pustay.jakub@gmail.com",
   formEndpoint: "", // paste a form-backend URL here once this is live on your own host (Formspree, Web3Forms, a systeme.io form action...) — leave empty and it opens an email draft instead
   types: ["Pet","Portrait","Landscape","Other"],
-  sizePricing: {"20 × 30 cm":3500, "40 × 50 cm":8500, "50 × 70 cm":13500},
+  sizePricing: {"25 × 30 cm":4500, "40 × 50 cm":8500, "50 × 70 cm":13500},
   framePrice: 1500
 };
 
@@ -213,18 +213,30 @@ const ph = (w,h,bg) => "data:image/svg+xml;utf8," + encodeURIComponent(
 // Once hosted, point images at real files, e.g.:
 //   images: ["images/new-piece-1.jpg", "images/new-piece-2.jpg"]
 const artworks = [
-  { id:"plod", title:"Plod", year:2026, medium:"Oil on canvas", dimensions:"30 × 40 cm", price:7500, status:"available",
+  { id:"albatros", title:"Albatros 498.1", year:2026, medium:"Oil on canvas", dimensions:"50 × 40 cm", status:"sold",
     images:["images/albatraz.jpeg"] },
-  { id:"modra-hodina", title:"Modrá hodina", year:2025, medium:"Oil on canvas", dimensions:"60 × 45 cm", price:11500, status:"available",
-    images:[ph(900,675,"#3a4560")] },
-  { id:"zatisi-citrony", title:"Zátiší s citrony", year:2025, medium:"Oil on canvas", dimensions:"40 × 40 cm", price:6800, status:"available",
-    images:[ph(700,700,"#b8873c")] },
-  { id:"cesta-lesem", title:"Cesta lesem", year:2024, medium:"Oil on canvas", dimensions:"90 × 40 cm", status:"sold",
-    images:[ph(1200,520,"#5b4a3a")] },
-  { id:"portret-v-sede", title:"Portrét v šedé", year:2026, medium:"Oil on canvas", dimensions:"35 × 50 cm", price:9200, status:"available",
-    images:[ph(560,800,"#6b6864"), ph(560,800,"#78746e")] },
-  { id:"tichy-dvur", title:"Tichý dvůr", year:2025, medium:"Oil on canvas", dimensions:"50 × 35 cm", price:8400, status:"available",
-    images:[ph(800,560,"#a8492f")] }
+  { id:"omar", title:"HUGE family portrait", year:2026, medium:"Oil on canvas", dimensions:"140 × 135 cm", status:"sold",
+    images:["images/omar_original.jpg", "images/omar_lifesize.JPG", "images/omar_watch.JPG", "images/omar_detail1.JPG", "images/omar_detail2.JPG", "images/omar_down.JPG"] },
+  { id:"persik", title:"Perseus", year:2026, medium:"Oil on panel", dimensions:"24 × 30 cm", price:5000, status:"available",
+    images:["images/persik.jpg"] },
+  { id:"shaker", title:"barman vibe", year:2025, medium:"Oil on canvas", dimensions:"50 × 50 cm", status:"sold",
+    images:["images/shaker.jpg"] },
+  { id:"nero", title:"Nero", year:2026, medium:"Oil on panel", dimensions:"24 × 30 cm", price:5000, status:"available",
+    images:["images/nero.jpg"] },
+  { id:"meggie", title:"Maggie", year:2026, medium:"Oil on canvas", dimensions:"25 × 30 cm", status:"sold",
+    images:["images/meggie.jpeg"] },
+  { id:"jeseniky", title:"Jesenické hory", year:2026, medium:"Oil on canvas", dimensions:"45 × 35 cm", price:10000, status:"available",
+    images:["images/jeseniky.jpg"] },
+  { id:"jesus", title:"son of a god", year:2026, medium:"Oil on panel", dimensions:"24 × 30 cm", price:5000, status:"available",
+    images:["images/jesus.jpg"] },
+  { id:"duck", title:"celebratory lunch", year:2026, medium:"Oil on panel", dimensions:"30 × 24 cm", status:"sold",
+    images:["images/nero.jpg"] },
+  { id:"cillian", title:"peaky blinders", year:2024, medium:"Oil on canvas", dimensions:"25 × 30 cm", price:5000, status:"available",
+    images:["images/cillian_murphy.jpg"] },
+  { id:"bradpit", title:"fight club", year:2024, medium:"Oil on panel", dimensions:"24 × 30 cm", price:5000, status:"available",
+    images:["images/bradpit.jpg"] },
+  { id:"anna", title:"Anna", year:2025, medium:"Oil on canvas", dimensions:"25 × 30 cm", status:"sold",
+    images:["images/.jpg"] }
 ];
 
 const fmt = n => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
