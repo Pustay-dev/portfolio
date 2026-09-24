@@ -88,16 +88,22 @@ main > section{ padding:40px var(--pad) 70px; max-width:1400px; margin:0 auto; }
 .cta{ border:1px solid var(--ink); padding:12px 22px; font-size:.75rem; letter-spacing:.07em; text-transform:uppercase; align-self:center; }
 .cta:hover{ background:var(--ink); color:#fff; }
 #inquiry-form{ max-width:420px; margin:34px auto 0; padding-top:28px; border-top:1px solid var(--line); display:flex; flex-direction:column; gap:12px; }
+#inquiry-form[hidden]{ display:none; }
 #inquiry-form input, #inquiry-form textarea{
   font:inherit; font-size:.9rem; border:none; border-bottom:1px solid var(--line); padding:8px 2px; background:none; resize:vertical;
 }
-.how{ max-width:460px; margin:54px auto 0; }
+.how{ max-width:460px; margin:0 auto 46px; }
 .how-title{ font-size:.78rem; letter-spacing:.09em; text-transform:uppercase; color:var(--meta); font-weight:500; text-align:center; margin-bottom:26px; }
 .step{ display:flex; align-items:flex-start; gap:16px; padding:16px 0; border-top:1px solid var(--line); }
 .step:last-child{ border-bottom:1px solid var(--line); }
 .num{ font-family:'Beau Rivage',cursive; font-size:1.7rem; color:var(--faint); line-height:1; min-width:36px; }
 .step-title{ font-size:.9rem; margin-bottom:3px; }
 .step-desc{ font-size:.8rem; color:var(--meta); line-height:1.4; }
+
+.lb-arrow{ position:fixed; top:50%; transform:translateY(-50%); font-size:2rem; padding:14px; color:var(--faint); z-index:101; }
+.lb-arrow:hover{ color:var(--ink); }
+.lb-prev{ left:2px; }
+.lb-next{ right:2px; }
 
 /* Contact */
 #contact p{ text-align:center; font-size:1rem; margin:10px 0; }
@@ -124,6 +130,13 @@ footer{ padding:30px var(--pad) calc(30px + env(safe-area-inset-bottom,0px)); di
 
   <section id="commissions" hidden>
     <p class="intro">Original oil paintings made from your photograph.</p>
+    <div class="how">
+      <h2 class="how-title">How it works</h2>
+      <div class="step"><span class="num">01</span><div><p class="step-title">Send a photograph</p><p class="step-desc">A clear, well-lit photo of your pet, subject, or place.</p></div></div>
+      <div class="step"><span class="num">02</span><div><p class="step-title">Agree on the details</p><p class="step-desc">We settle on size, framing, and a timeline together.</p></div></div>
+      <div class="step"><span class="num">03</span><div><p class="step-title">I paint it</p><p class="step-desc">Hand-painted in oil, start to finish, in the studio.</p></div></div>
+      <div class="step"><span class="num">04</span><div><p class="step-title">Receive the finished painting</p><p class="step-desc">Carefully packaged and shipped to your door.</p></div></div>
+    </div>
     <div class="calc">
       <div><p class="opt-label">Type</p><div class="pills" id="type-pills"></div></div>
       <div><p class="opt-label">Size</p><div class="pills" id="size-pills"></div></div>
@@ -139,13 +152,6 @@ footer{ padding:30px var(--pad) calc(30px + env(safe-area-inset-bottom,0px)); di
       <button type="submit" class="cta">Send inquiry</button>
     </form>
     <p id="inquiry-sent" hidden style="text-align:center;font-size:.9rem;">Thanks — I'll be in touch shortly.</p>
-    <div class="how">
-      <h2 class="how-title">How it works</h2>
-      <div class="step"><span class="num">01</span><div><p class="step-title">Send a photograph</p><p class="step-desc">A clear, well-lit photo of your pet, subject, or place.</p></div></div>
-      <div class="step"><span class="num">02</span><div><p class="step-title">Agree on the details</p><p class="step-desc">We settle on size, framing, and a timeline together.</p></div></div>
-      <div class="step"><span class="num">03</span><div><p class="step-title">I paint it</p><p class="step-desc">Hand-painted in oil, start to finish, in the studio.</p></div></div>
-      <div class="step"><span class="num">04</span><div><p class="step-title">Receive the finished painting</p><p class="step-desc">Carefully packaged and shipped to your door.</p></div></div>
-    </div>
   </section>
 
   <section id="contact" hidden>
@@ -156,6 +162,8 @@ footer{ padding:30px var(--pad) calc(30px + env(safe-area-inset-bottom,0px)); di
 
 <div class="lightbox" id="lightbox" aria-hidden="true">
   <button class="lb-close" id="lb-close" aria-label="Close">×</button>
+  <button class="lb-arrow lb-prev" id="lb-prev" aria-label="Previous image" style="display:none;">‹</button>
+  <button class="lb-arrow lb-next" id="lb-next" aria-label="Next image" style="display:none;">›</button>
   <div class="lb-content">
     <img id="lb-img" alt="">
     <div class="lb-dots" id="lb-dots"></div>
@@ -165,6 +173,7 @@ footer{ padding:30px var(--pad) calc(30px + env(safe-area-inset-bottom,0px)); di
       <p id="lb-medium"></p>
       <p id="lb-dim"></p>
       <p class="status" id="lb-status"></p>
+      <button class="cta" id="lb-buy" style="display:none;margin-top:14px;">Buy now</button>
     </div>
   </div>
 </div>
@@ -189,6 +198,16 @@ const CONFIG = {
 const ph = (w,h,bg) => "data:image/svg+xml;utf8," + encodeURIComponent(
   `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="${bg}"/></svg>`);
 
+// ---------- Your paintings ----------
+// Add a painting by adding one object to this array. Fields:
+//   id          unique short id (letters/numbers/dashes, used internally only)
+//   title, year, medium, dimensions   shown as text in the grid and popup
+//   price       number in CZK — leave this field out entirely to show no price
+//   status      "available" or "sold" — sold paintings hide price and Buy now
+//   images      list of photo URLs, first one is the grid thumbnail.
+//               One photo or several (viewer can swipe/arrow between them).
+// Once hosted, point images at real files, e.g.:
+//   images: ["images/new-piece-1.jpg", "images/new-piece-2.jpg"]
 const artworks = [
   { id:"plod", title:"Plod", year:2026, medium:"Oil on canvas", dimensions:"30 × 40 cm", price:7500, status:"available",
     images:[ph(600,800,"#4d5a4a"), ph(600,800,"#5c6b58")] },
@@ -238,6 +257,7 @@ function openLightbox(a){
   document.getElementById("lb-medium").textContent = a.medium;
   document.getElementById("lb-dim").textContent = a.dimensions;
   document.getElementById("lb-status").textContent = a.status === "sold" ? "Sold" : (a.price ? `${fmt(a.price)} Kč — Available` : "Available");
+  document.getElementById("lb-buy").style.display = a.status === "sold" ? "none" : "inline-block";
   renderImg(); renderDots();
   lightbox.classList.add("open"); lightbox.setAttribute("aria-hidden","false");
   document.body.style.overflow = "hidden";
@@ -249,9 +269,12 @@ function renderImg(){
   img.alt = `${current.title}, oil painting by Jakub Pustay, ${current.year}`;
 }
 function renderDots(){
+  const multi = current.images.length > 1;
   const el = document.getElementById("lb-dots");
   el.innerHTML = "";
-  el.style.display = current.images.length > 1 ? "flex" : "none";
+  el.style.display = multi ? "flex" : "none";
+  document.getElementById("lb-prev").style.display = multi ? "block" : "none";
+  document.getElementById("lb-next").style.display = multi ? "block" : "none";
   current.images.forEach((_, i) => {
     const d = document.createElement("button");
     d.className = "dot" + (i === idx ? " active" : "");
@@ -260,13 +283,35 @@ function renderDots(){
     el.appendChild(d);
   });
 }
+function prevImg(){ if (current.images.length < 2) return; idx = (idx - 1 + current.images.length) % current.images.length; renderImg(); renderDots(); }
+function nextImg(){ if (current.images.length < 2) return; idx = (idx + 1) % current.images.length; renderImg(); renderDots(); }
 function closeLightbox(){
   lightbox.classList.remove("open"); lightbox.setAttribute("aria-hidden","true");
   document.body.style.overflow = "";
 }
 document.getElementById("lb-close").addEventListener("click", closeLightbox);
+document.getElementById("lb-prev").addEventListener("click", prevImg);
+document.getElementById("lb-next").addEventListener("click", nextImg);
+document.getElementById("lb-buy").addEventListener("click", () => {
+  const body = `I'd like to purchase:\n\n${current.title}\n${current.year}\n${current.medium}\n${current.dimensions}${current.price ? "\n"+fmt(current.price)+" Kč" : ""}`;
+  window.location.href = `mailto:${CONFIG.email}?subject=${encodeURIComponent("Purchase inquiry: "+current.title)}&body=${encodeURIComponent(body)}`;
+});
 lightbox.addEventListener("click", e => { if (e.target === lightbox) closeLightbox(); });
-document.addEventListener("keydown", e => { if (e.key === "Escape" && lightbox.classList.contains("open")) closeLightbox(); });
+document.addEventListener("keydown", e => {
+  if (!lightbox.classList.contains("open")) return;
+  if (e.key === "Escape") closeLightbox();
+  if (e.key === "ArrowRight") nextImg();
+  if (e.key === "ArrowLeft") prevImg();
+});
+let touchX = null;
+const lbContent = document.querySelector(".lb-content");
+lbContent.addEventListener("touchstart", e => { touchX = e.touches[0].clientX; }, {passive:true});
+lbContent.addEventListener("touchend", e => {
+  if (touchX === null) return;
+  const dx = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(dx) > 40) { dx < 0 ? nextImg() : prevImg(); }
+  touchX = null;
+}, {passive:true});
 
 // ---------- Navigation ----------
 function showSection(hash){
