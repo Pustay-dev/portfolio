@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jakub Pustay — Paintings</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -68,9 +68,20 @@ main > section{ padding:40px var(--pad) calc(70px + env(safe-area-inset-bottom,0
 .lightbox{ position:fixed; inset:0; background:#fff; z-index:100; display:none; overflow-y:auto; }
 .lightbox.open{ display:flex; align-items:center; justify-content:center; animation:fadein .2s ease; }
 @keyframes fadein{ from{opacity:0} to{opacity:1} }
-.lb-close{ position:fixed; top:calc(18px + env(safe-area-inset-top,0px)); right:20px; font-size:1.6rem; line-height:1; }
+.lb-close{ position:fixed; top:calc(18px + env(safe-area-inset-top,0px)); right:20px; font-size:1.6rem; line-height:1; z-index:102; }
 .lb-content{ max-width:900px; width:100%; padding:60px 24px 40px; text-align:center; }
-.lb-content img{ max-height:70vh; margin:0 auto 22px; }
+.lb-img-wrap{ position:relative; display:inline-block; max-width:100%; }
+.lb-img-wrap img{ max-height:70vh; display:block; margin:0 auto 22px; transition:opacity .25s ease; }
+.lb-spinner{ display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:26px; height:26px; border:2px solid var(--line); border-top-color:var(--ink); border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin{ to{ transform:translate(-50%,-50%) rotate(360deg); } }
+.lb-arrow{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:34px; height:34px; display:flex; align-items:center; justify-content:center;
+  font-size:1.3rem; line-height:1; color:#fff; background:rgba(20,20,20,.35); border-radius:50%;
+}
+.lb-arrow:hover{ background:rgba(20,20,20,.55); }
+.lb-prev{ left:10px; }
+.lb-next{ right:10px; }
 .lb-dots{ display:flex; gap:7px; justify-content:center; margin-bottom:20px; }
 .dot{ width:7px; height:7px; border-radius:50%; border:1px solid var(--ink); }
 .dot.active{ background:var(--ink); }
@@ -104,10 +115,6 @@ main > section{ padding:40px var(--pad) calc(70px + env(safe-area-inset-bottom,0
 .step-title{ font-size:.9rem; margin-bottom:3px; }
 .step-desc{ font-size:.8rem; color:var(--meta); line-height:1.4; }
 
-.lb-arrow{ position:fixed; top:50%; transform:translateY(-50%); font-size:2rem; padding:14px; color:var(--faint); z-index:101; }
-.lb-arrow:hover{ color:var(--ink); }
-.lb-prev{ left:2px; }
-.lb-next{ right:2px; }
 
 /* Contact */
 #contact p{ text-align:center; font-size:1rem; margin:10px 0; }
@@ -164,10 +171,13 @@ main > section{ padding:40px var(--pad) calc(70px + env(safe-area-inset-bottom,0
 
 <div class="lightbox" id="lightbox" aria-hidden="true">
   <button class="lb-close" id="lb-close" aria-label="Close">×</button>
-  <button class="lb-arrow lb-prev" id="lb-prev" aria-label="Previous image" style="display:none;">‹</button>
-  <button class="lb-arrow lb-next" id="lb-next" aria-label="Next image" style="display:none;">›</button>
   <div class="lb-content">
-    <img id="lb-img" alt="">
+    <div class="lb-img-wrap">
+      <div class="lb-spinner" id="lb-spinner"></div>
+      <img id="lb-img" alt="">
+      <button class="lb-arrow lb-prev" id="lb-prev" aria-label="Previous image" style="display:none;">‹</button>
+      <button class="lb-arrow lb-next" id="lb-next" aria-label="Next image" style="display:none;">›</button>
+    </div>
     <div class="lb-dots" id="lb-dots"></div>
     <div class="lb-info">
       <p class="title" id="lb-title"></p>
@@ -182,17 +192,6 @@ main > section{ padding:40px var(--pad) calc(70px + env(safe-area-inset-bottom,0
 
 
 <script>
-// ---------- Block pinch/double-tap zoom (meta tag alone is unreliable on iOS Safari) ----------
-document.addEventListener("gesturestart", e => e.preventDefault());
-document.addEventListener("gesturechange", e => e.preventDefault());
-document.addEventListener("touchmove", e => { if (e.touches.length > 1) e.preventDefault(); }, { passive:false });
-let lastTouchEnd = 0;
-document.addEventListener("touchend", e => {
-  const now = Date.now();
-  if (now - lastTouchEnd <= 300) e.preventDefault();
-  lastTouchEnd = now;
-}, { passive:false });
-
 // ---------- CONFIG (edit prices here) ----------
 const CONFIG = {
   email: "pustay.jakub@gmail.com",
@@ -212,10 +211,13 @@ const ph = (w,h,bg) => "data:image/svg+xml;utf8," + encodeURIComponent(
 //   title, year, medium, dimensions   shown as text in the grid and popup
 //   price       number in CZK — leave this field out entirely to show no price
 //   status      "available" or "sold" — sold paintings hide price and Buy now
-//   images      list of photo URLs, first one is the grid thumbnail.
+//   thumb       optional — a smaller, lighter image just for the grid.
+//               Leave it out and the grid uses images[0] instead.
+//   images      list of full-size photo URLs, first one is the popup's first image.
 //               One photo or several (viewer can swipe/arrow between them).
-// Once hosted, point images at real files, e.g.:
-//   images: ["images/new-piece-1.jpg", "images/new-piece-2.jpg"]
+// Once hosted, point these at your real (compressed!) files, e.g.:
+//   { ..., thumb:"images/new-piece-thumb.jpg",
+//     images:["images/new-piece-1.jpg","images/new-piece-2.jpg"] }
 const artworks = [
   { id:"albatros", title:"Albatros 498.1", year:2026, medium:"Oil on canvas", dimensions:"50 × 40 cm", status:"sold",
     images:["images/albatraz.jpeg"] },
@@ -254,7 +256,7 @@ artworks.forEach(a => {
   el.className = "artwork"; el.tabIndex = 0; el.setAttribute("role","button");
   el.setAttribute("aria-label", `${a.title}, ${a.year}`);
   const img = document.createElement("img");
-  img.src = a.images[0]; img.loading = "lazy";
+  img.src = a.thumb || a.images[0]; img.loading = "lazy";
   img.alt = `${a.title}, oil painting by Jakub Pustay, ${a.year}`;
   const overlay = document.createElement("div");
   overlay.className = "overlay";
@@ -287,6 +289,11 @@ function openLightbox(a){
 }
 function renderImg(){
   const img = document.getElementById("lb-img");
+  const spinner = document.getElementById("lb-spinner");
+  img.style.opacity = "0";
+  spinner.style.display = "block";
+  img.onload = () => { spinner.style.display = "none"; img.style.opacity = "1"; };
+  img.onerror = () => { spinner.style.display = "none"; img.style.opacity = "1"; };
   img.src = current.images[idx];
   img.alt = `${current.title}, oil painting by Jakub Pustay, ${current.year}`;
 }
