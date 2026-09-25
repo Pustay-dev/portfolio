@@ -44,6 +44,23 @@ nav{ display:flex; gap:22px; }
 nav a{ font-size:.72rem; letter-spacing:.09em; text-transform:uppercase; color:var(--meta); padding-bottom:3px; }
 nav a.active{ color:var(--ink); border-bottom:1px solid var(--ink); }
 
+.lang{
+  display:flex;
+  gap:7px;
+  font-size:.62rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+.lang a.active{
+  color:var(--ink);
+}
+
+.lang span{
+  color:var(--line);
+}
+
 main > section{ padding:40px var(--pad) calc(70px + env(safe-area-inset-bottom,0px)); max-width:1400px; margin:0 auto; }
 #portfolio{ padding-top:20px; }
 
@@ -130,11 +147,18 @@ main > section{ padding:40px var(--pad) calc(70px + env(safe-area-inset-bottom,0
 
 <header>
   <a href="#portfolio" class="signature"><img src="images/signature.png" alt="Jakub Pustay"></a>
+
   <nav>
     <a href="#portfolio">Portfolio</a>
     <a href="#commissions">Commissions</a>
     <a href="#contact">Contact</a>
   </nav>
+
+  <div class="lang">
+    <a class="active" href="./">EN</a>
+    <span>/</span>
+    <a href="cz/">CZ</a>
+  </div>
 </header>
 
 <main>
