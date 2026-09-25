@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jakub Pustay — Obrazy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Beau+Rivage&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#161513; --meta:#767470; --faint:#a9a7a2; --line:#e9e8e5;
+  --pad:6vw;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{ scroll-padding-top:env(safe-area-inset-top,0px); }
+*{ box-sizing:inherit; margin:0; padding:0; }
+@media (max-width:480px){ :root{ --pad:16px; } }
+body{
+  background:#fff; color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+a{ color:inherit; text-decoration:none; }
+button{ font:inherit; color:inherit; background:none; border:none; cursor:pointer; }
+img{ max-width:100%; display:block; }
+@media (prefers-reduced-motion:reduce){ *{ transition:none!important; animation:none!important; } }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, [tabindex]:focus-visible{
+  outline:2px solid var(--ink); outline-offset:3px;
+}
+
+/* Header */
+header{
+  padding:36px var(--pad) 20px; display:flex; flex-direction:column; align-items:center; gap:18px;
+}
+.signature img {
+  width: auto;
+  height: 150px;
+  display: block;
+}
+nav{ display:flex; gap:22px; }
+nav a{ font-size:.72rem; letter-spacing:.09em; text-transform:uppercase; color:var(--meta); padding-bottom:3px; }
+nav a.active{ color:var(--ink); border-bottom:1px solid var(--ink); }
+
+.lang{
+  display:flex;
+  gap:7px;
+  font-size:.62rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+.lang a.active{ color:var(--ink); }
+.lang span{ color:var(--line); }
+
+main > section{ padding:40px var(--pad) calc(70px + env(safe-area-inset-bottom,0px)); max-width:1400px; margin:0 auto; }
+#portfolio{ padding-top:20px; }
+
+/* Portfolio filter */
+.filter{ display:flex; justify-content:center; gap:18px; margin-bottom:16px; }
+.filter-btn{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--meta); padding-bottom:2px; }
+.filter-btn.active{ color:var(--ink); border-bottom:1px solid var(--ink); }
+
+/* Portfolio grid */
+.grid{ column-count:3; column-gap:20px; }
+@media (max-width:900px){ .grid{ column-count:2; } }
+@media (max-width:480px){ .grid{ column-count:2; column-gap:12px; } }
+.artwork{ break-inside:avoid; margin-bottom:20px; position:relative; cursor:pointer; }
+@media (max-width:480px){ .artwork{ margin-bottom:12px; } }
+.artwork img{ width:100%; height:auto; }
+.grid.hide-sold .artwork[data-status="sold"]{ display:none; }
+.artwork .overlay{
+  position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-end;
+  padding:16px; opacity:0; transition:opacity .18s ease; background:rgba(255,255,255,0);
+}
+@media (hover:hover){
+  .artwork:hover .overlay, .artwork:focus-visible .overlay{ opacity:1; background:rgba(255,255,255,.82); }
+}
+.overlay .t{ font-size:.82rem; }
+.overlay .s{ font-size:.74rem; color:var(--meta); display:block; margin-top:2px; }
+.overlay .sold{ color:var(--faint); }
+
+/* Lightbox */
+.lightbox{ position:fixed; inset:0; height:100vh; height:100dvh; background:#fff; z-index:100; display:none; overflow-y:auto; }
+.lightbox.open{ display:flex; align-items:center; justify-content:center; animation:fadein .2s ease; }
+@keyframes fadein{ from{opacity:0} to{opacity:1} }
+.lb-close{ position:fixed; top:calc(18px + env(safe-area-inset-top,0px)); right:20px; font-size:1.6rem; line-height:1; z-index:102; }
+.lb-content{ max-width:900px; width:100%; padding:60px 24px 40px; text-align:center; }
+.lb-img-wrap{ position:relative; display:inline-block; max-width:100%; }
+.lb-img-wrap img{ max-height:70vh; display:block; margin:0 auto 22px; transition:opacity .25s ease; }
+.lb-arrow{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:34px; height:34px; display:flex; align-items:center; justify-content:center;
+  font-size:1.3rem; line-height:1; color:#fff; background:rgba(20,20,20,.35); border-radius:50%;
+}
+.lb-arrow:hover{ background:rgba(20,20,20,.55); }
+.lb-prev{ left:10px; }
+.lb-next{ right:10px; }
+.lb-dots{ display:flex; gap:7px; justify-content:center; margin-bottom:20px; }
+.dot{ width:7px; height:7px; border-radius:50%; border:1px solid var(--ink); }
+.dot.active{ background:var(--ink); }
+.lb-info p{ font-size:.85rem; margin:3px 0; }
+.lb-info .title{ font-size:.95rem; margin-bottom:6px; }
+.lb-info .status{ color:var(--meta); margin-top:8px; }
+
+/* Commissions */
+.intro{ text-align:center; color:var(--meta); font-size:.9rem; margin:0 0 34px; }
+.calc{ max-width:420px; margin:0 auto; display:flex; flex-direction:column; gap:22px; }
+.opt-label{ font-size:.72rem; letter-spacing:.07em; text-transform:uppercase; color:var(--meta); margin-bottom:10px; }
+.pills{ display:flex; flex-wrap:wrap; gap:8px; }
+.pill{ border:1px solid var(--ink); padding:8px 14px; font-size:.82rem; }
+.pill.active{ background:var(--ink); color:#fff; }
+.checkbox{ display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.checkbox input{ width:16px; height:16px; accent-color:var(--ink); }
+.estimate{ text-align:center; padding-top:6px; border-top:1px solid var(--line); }
+.price{ font-size:1.3rem; }
+.cta{ border:1px solid var(--ink); padding:12px 22px; font-size:.75rem; letter-spacing:.07em; text-transform:uppercase; align-self:center; }
+.cta:hover{ background:var(--ink); color:#fff; }
+#inquiry-form{ max-width:420px; margin:34px auto 0; padding-top:28px; border-top:1px solid var(--line); display:flex; flex-direction:column; gap:12px; }
+#inquiry-form[hidden]{ display:none; }
+#inquiry-form input, #inquiry-form textarea{
+  font:inherit; font-size:.9rem; border:none; border-bottom:1px solid var(--line); padding:8px 2px; background:none; resize:vertical;
+}
+.how{ max-width:460px; margin:54px auto 0; }
+.how-title{ font-size:.78rem; letter-spacing:.09em; text-transform:uppercase; color:var(--meta); font-weight:500; text-align:center; margin-bottom:26px; }
+.step{ display:flex; align-items:flex-start; gap:16px; padding:16px 0; border-top:1px solid var(--line); }
+.step:last-child{ border-bottom:1px solid var(--line); }
+.num{ font-family:'Beau Rivage',cursive; font-size:1.7rem; color:var(--faint); line-height:1; min-width:36px; }
+.step-title{ font-size:.9rem; margin-bottom:3px; }
+.step-desc{ font-size:.8rem; color:var(--meta); line-height:1.4; }
+
+/* Contact */
+#contact p{ text-align:center; font-size:1rem; margin:10px 0; }
+.ig-link{ display:inline-flex; align-items:center; gap:8px; }
+.ig-link svg{ width:18px; height:18px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="#portfolio" class="signature"><img src="../images/signature.png" alt="Jakub Pustay"></a>
+  <nav>
+    <a href="#portfolio">Portfolio</a>
+    <a href="#commissions">Zakázky</a>
+    <a href="#contact">Kontakt</a>
+  </nav>
+  <div class="lang">
+    <a href="../">EN</a><span>/</span><a class="active" href="./">CZ</a>
+  </div>
+</header>
+
+<main>
+  <section id="portfolio">
+    <div class="filter" id="portfolio-filter">
+      <button class="filter-btn active" data-filter="all">Vše</button>
+      <button class="filter-btn" data-filter="available">Dostupné</button>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section id="commissions" hidden>
+    <p class="intro">Originální olejomalby podle vaší fotografie.</p>
+    <div class="calc">
+      <div><p class="opt-label">Typ</p><div class="pills" id="type-pills"></div></div>
+      <div><p class="opt-label">Velikost</p><div class="pills" id="size-pills"></div></div>
+      <label class="checkbox"><input type="checkbox" id="frame-check"> Zarámované</label>
+      <div class="estimate"><p class="opt-label">Orientační cena</p><p class="price" id="est-price"></p></div>
+      <button class="cta" id="start-btn">Objednat obraz</button>
+    </div>
+    <form id="inquiry-form" hidden>
+      <p class="opt-label" style="text-align:center;">Vaše údaje</p>
+      <input name="name" placeholder="Jméno" required>
+      <input name="contact" placeholder="E-mail nebo telefon" required>
+      <textarea name="message" placeholder="Zpráva (nepovinné)" rows="3"></textarea>
+      <button type="submit" class="cta">Odeslat poptávku</button>
+    </form>
+    <p id="inquiry-sent" hidden style="text-align:center;font-size:.9rem;">Děkuji — brzy se vám ozvu.</p>
+    <div class="how">
+      <h2 class="how-title">Jak to funguje</h2>
+      <div class="step"><span class="num">01</span><div><p class="step-title">Pošlete fotografii</p><p class="step-desc">Stačí několik jasných a dobře osvětlených fotografií vašeho zvířete, osoby nebo místa.</p></div></div>
+      <div class="step"><span class="num">02</span><div><p class="step-title">Domluvíme detaily</p><p class="step-desc">Společně domluvíme velikost, rámování a termín.</p></div></div>
+      <div class="step"><span class="num">03</span><div><p class="step-title">Obraz namaluji</p><p class="step-desc">Ručně malovaný olejem, od začátku do konce v ateliéru.</p></div></div>
+      <div class="step"><span class="num">04</span><div><p class="step-title">Obdržíte hotový obraz</p><p class="step-desc">Pečlivě zabalený a doručený až k vám.</p></div></div>
+    </div>
+  </section>
+
+  <section id="contact" hidden>
+    <p><a href="tel:+420777126358">+420 777 126 358</a></p>
+    <p><a href="mailto:pustay.jakub@gmail.com">pustay.jakub@gmail.com</a></p>
+    <p><a class="ig-link" href="https://www.instagram.com/nekreativni_kreatura_"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.3" cy="6.7" r="1"/></svg>@jakubpustay</a></p>
+  </section>
+</main>
+
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <button class="lb-close" id="lb-close" aria-label="Zavřít">×</button>
+  <div class="lb-content">
+    <div class="lb-img-wrap">
+      <img id="lb-img" alt="">
+      <button class="lb-arrow lb-prev" id="lb-prev" aria-label="Předchozí obraz" style="display:none;">‹</button>
+      <button class="lb-arrow lb-next" id="lb-next" aria-label="Další obraz" style="display:none;">›</button>
+    </div>
+    <div class="lb-dots" id="lb-dots"></div>
+    <div class="lb-info">
+      <p class="title" id="lb-title"></p>
+      <p id="lb-year"></p>
+      <p id="lb-medium"></p>
+      <p id="lb-dim"></p>
+      <p class="status" id="lb-status"></p>
+      <button class="cta" id="lb-buy" style="display:none;margin-top:14px;">Koupit</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ---------- CONFIG (edit prices here) ----------
+const CONFIG = {
+  email: "pustay.jakub@gmail.com",
+  formEndpoint: "", // paste a form-backend URL here once this is live on your own host (Formspree, Web3Forms, a systeme.io form action...) — leave empty and it opens an email draft instead
+  types: ["Zvíře","Portrét","Krajina","Jiné"],
+  sizePricing: {"25 × 30 cm":4500, "40 × 50 cm":8500, "50 × 70 cm":13500},
+  framePrice: 1500
+};
+
+// ---------- Your paintings ----------
+// Add a painting by adding one object to this array. Fields:
+//   id          unique short id (letters/numbers/dashes, used internally only)
+//   title, year, medium, dimensions   shown as text in the grid and popup
+//   price       number in CZK — leave this field out entirely to show no price
+//   status      "available" or "sold" — sold paintings hide price and Koupit
+//   images      list of photo URLs, first one is the grid thumbnail and popup's first image.
+//               One photo or several (viewer can swipe/arrow between them).
+const artworks = [
+  { id:"albatros", title:"Albatros 498.1", year:2026, medium:"Olej na plátně", dimensions:"50 × 40 cm", status:"sold",
+    images:["../images/compresed/albatraz Large.jpeg"] },
+  { id:"omar", title:"HUGE family portrait", year:2026, medium:"Olej na plátně", dimensions:"140 × 135 cm", status:"sold",
+    images:["../images/compresed/omar_original Large.jpeg", "../images/omar_lifesize.jpeg", "../images/omar_watch.jpg", "../images/omar_detail1.jpg", "../images/omar_detail2.jpg", "../images/omar_down.jpg"] },
+  { id:"persik", title:"Perseus", year:2026, medium:"Olej na desce", dimensions:"24 × 30 cm", price:5000, status:"available",
+    images:["../images/compresed/persik Large.jpeg"] },
+  { id:"shaker", title:"barman vibe", year:2025, medium:"Olej na plátně", dimensions:"50 × 50 cm", status:"sold",
+    images:["../images/compresed/shaker Large.jpeg"] },
+  { id:"nero", title:"Nero", year:2026, medium:"Olej na desce", dimensions:"24 × 30 cm", price:5000, status:"available",
+    images:["../images/compresed/nero Large.jpeg"] },
+  { id:"meggie", title:"Maggie", year:2026, medium:"Olej na plátně", dimensions:"25 × 30 cm", status:"sold",
+    images:["../images/compresed/meggie Large.jpeg"] },
+  { id:"jeseniky", title:"Jesenické hory", year:2026, medium:"Olej na plátně", dimensions:"45 × 35 cm", price:10000, status:"available",
+    images:["../images/compresed/jeseniky Large.jpeg"] },
+  { id:"jesus", title:"son of a god", year:2026, medium:"Olej na desce", dimensions:"24 × 30 cm", price:5000, status:"available",
+    images:["../images/compresed/jesus Large.jpeg"] },
+  { id:"duck", title:"celebratory lunch", year:2026, medium:"Olej na desce", dimensions:"30 × 24 cm", status:"sold",
+    images:["../images/compresed/duck Large.jpeg"] },
+  { id:"cillian", title:"peaky blinders", year:2024, medium:"Olej na plátně", dimensions:"25 × 30 cm", price:5000, status:"available",
+    images:["../images/compresed/murphy Large.jpeg"] },
+  { id:"bradpit", title:"fight club", year:2024, medium:"Olej na desce", dimensions:"24 × 30 cm", price:5000, status:"available",
+    images:["../images/compresed/bradpit Large.jpeg"] },
+  { id:"zofie", title:"Zophy", year:2026, medium:"Olej na plátně", dimensions:"30 × 24 cm", status:"sold",
+    images:["../images/compresed/zofie Large.jpeg"] },
+  { id:"bulky", title:"bulky", year:2025, medium:"Olej na plátně", dimensions:"15 × 10 cm", status:"sold",
+    images:["../images/compresed/bulky.jpeg"] },
+  { id:"tramvaj", title:"tramvaj", year:2025, medium:"Olej na plátně", dimensions:"7,5 × 7,5 cm", status:"sold",
+    images:["../images/compresed/tramvaj.jpeg", "../images/compresed/tramvaj2.jpeg"] },
+  { id:"rozpek", title:"rozpek", year:2025, medium:"Olej na plátně", dimensions:"15 × 10 cm", status:"sold",
+    images:["../images/compresed/zapek.jpeg"] },
+  { id:"citrony", title:"citrony", year:2025, medium:"Olej na plátně", dimensions:"15 × 10 cm", status:"sold",
+    images:["../images/compresed/citrony.jpeg"] },
+  { id:"anna", title:"Anna", year:2025, medium:"Olej na plátně", dimensions:"25 × 30 cm", status:"sold",
+    images:["../images/compresed/ana Large.jpeg"] }
+];
+const fmt = n => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
+// ---------- Portfolio grid ----------
+const grid = document.getElementById("grid");
+artworks.forEach(a => {
+  const el = document.createElement("div");
+  el.className = "artwork"; el.tabIndex = 0; el.setAttribute("role","button");
+  el.setAttribute("aria-label", `${a.title}, ${a.year}`);
+  el.dataset.status = a.status;
+  const img = document.createElement("img");
+  img.src = a.images[0]; img.loading = "lazy";
+  img.alt = `${a.title}, olejomalba od Jakuba Pustaye, ${a.year}`;
+  const overlay = document.createElement("div");
+  overlay.className = "overlay";
+  let html = `<span class="t">${a.title}</span>`;
+  if (a.status === "sold") html += `<span class="s sold">Prodáno</span>`;
+  else { if (a.price) html += `<span class="s">${fmt(a.price)} Kč</span>`; html += `<span class="s">Dostupné</span>`; }
+  overlay.innerHTML = html;
+  el.append(img, overlay);
+  el.addEventListener("click", () => openLightbox(a));
+  el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(a); } });
+  grid.appendChild(el);
+});
+
+// ---------- Portfolio filter ----------
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    grid.classList.toggle("hide-sold", btn.dataset.filter === "available");
+  });
+});
+
+// ---------- Lightbox ----------
+const lightbox = document.getElementById("lightbox");
+let current = null, idx = 0;
+
+function openLightbox(a){
+  current = a; idx = 0;
+  document.getElementById("lb-title").textContent = a.title;
+  document.getElementById("lb-year").textContent = a.year;
+  document.getElementById("lb-medium").textContent = a.medium;
+  document.getElementById("lb-dim").textContent = a.dimensions;
+  document.getElementById("lb-status").textContent = a.status === "sold" ? "Prodáno" : (a.price ? `${fmt(a.price)} Kč — Dostupné` : "Dostupné");
+  document.getElementById("lb-buy").style.display = a.status === "sold" ? "none" : "inline-block";
+  renderImg(); renderDots();
+  lightbox.classList.add("open"); lightbox.setAttribute("aria-hidden","false");
+  document.body.style.overflow = "hidden";
+  document.getElementById("lb-close").focus();
+}
+function renderImg(){
+  const img = document.getElementById("lb-img");
+  img.style.opacity = "0";
+  img.onload = () => { img.style.opacity = "1"; };
+  img.onerror = () => { img.style.opacity = "1"; };
+  img.src = current.images[idx];
+  img.alt = `${current.title}, olejomalba od Jakuba Pustaye, ${current.year}`;
+}
+function renderDots(){
+  const multi = current.images.length > 1;
+  const el = document.getElementById("lb-dots");
+  el.innerHTML = "";
+  el.style.display = multi ? "flex" : "none";
+  const prevBtn = document.getElementById("lb-prev"), nextBtn = document.getElementById("lb-next");
+  prevBtn.style.display = multi ? "block" : "none";
+  nextBtn.style.display = multi ? "block" : "none";
+  prevBtn.style.opacity = idx === 0 ? "0.25" : "1";
+  nextBtn.style.opacity = idx === current.images.length - 1 ? "0.25" : "1";
+  current.images.forEach((_, i) => {
+    const d = document.createElement("button");
+    d.className = "dot" + (i === idx ? " active" : "");
+    d.setAttribute("aria-label", `Obraz ${i+1}`);
+    d.addEventListener("click", () => { idx = i; renderImg(); renderDots(); });
+    el.appendChild(d);
+  });
+}
+function prevImg(){ if (idx <= 0) return; idx--; renderImg(); renderDots(); }
+function nextImg(){ if (idx >= current.images.length - 1) return; idx++; renderImg(); renderDots(); }
+function closeLightbox(){
+  lightbox.classList.remove("open"); lightbox.setAttribute("aria-hidden","true");
+  document.body.style.overflow = "";
+}
+document.getElementById("lb-close").addEventListener("click", closeLightbox);
+document.getElementById("lb-prev").addEventListener("click", prevImg);
+document.getElementById("lb-next").addEventListener("click", nextImg);
+document.getElementById("lb-buy").addEventListener("click", () => {
+  const body = `Mám zájem o koupi:\n\n${current.title}\n${current.year}\n${current.medium}\n${current.dimensions}${current.price ? "\n"+fmt(current.price)+" Kč" : ""}`;
+  window.location.href = `mailto:${CONFIG.email}?subject=${encodeURIComponent("Poptávka ke koupi: "+current.title)}&body=${encodeURIComponent(body)}`;
+});
+lightbox.addEventListener("click", e => { if (e.target === lightbox) closeLightbox(); });
+document.addEventListener("keydown", e => {
+  if (!lightbox.classList.contains("open")) return;
+  if (e.key === "Escape") closeLightbox();
+  if (e.key === "ArrowRight") nextImg();
+  if (e.key === "ArrowLeft") prevImg();
+});
+let touchX = null;
+const lbContent = document.querySelector(".lb-content");
+lbContent.addEventListener("touchstart", e => { touchX = e.touches[0].clientX; }, {passive:true});
+lbContent.addEventListener("touchend", e => {
+  if (touchX === null) return;
+  const dx = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(dx) > 40) { dx < 0 ? nextImg() : prevImg(); }
+  touchX = null;
+}, {passive:true});
+
+// ---------- Navigation ----------
+function showSection(hash){
+  const id = (hash || "#portfolio").replace("#","") || "portfolio";
+  document.querySelectorAll("main > section").forEach(s => s.hidden = s.id !== id);
+  document.querySelectorAll("nav a").forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#"+id));
+}
+window.addEventListener("hashchange", () => showSection(location.hash));
+showSection(location.hash);
+
+// ---------- Commission calculator ----------
+const state = { type: CONFIG.types[0], size: Object.keys(CONFIG.sizePricing)[0], framed:false };
+function renderPills(containerId, options, selected, onSelect){
+  const el = document.getElementById(containerId);
+  el.innerHTML = "";
+  options.forEach(opt => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "pill" + (opt === selected ? " active" : "");
+    b.textContent = opt;
+    b.addEventListener("click", () => onSelect(opt));
+    el.appendChild(b);
+  });
+}
+function updatePrice(){
+  const total = (CONFIG.sizePricing[state.size]||0) + (state.framed ? CONFIG.framePrice : 0);
+  document.getElementById("est-price").textContent = fmt(total) + " Kč";
+}
+function refreshCalc(){
+  renderPills("type-pills", CONFIG.types, state.type, t => { state.type = t; refreshCalc(); });
+  renderPills("size-pills", Object.keys(CONFIG.sizePricing), state.size, s => { state.size = s; refreshCalc(); });
+  updatePrice();
+}
+document.getElementById("frame-check").addEventListener("change", e => { state.framed = e.target.checked; updatePrice(); });
+refreshCalc();
+
+document.getElementById("start-btn").addEventListener("click", () => {
+  document.getElementById("start-btn").hidden = true;
+  const f = document.getElementById("inquiry-form");
+  f.hidden = false;
+  f.scrollIntoView({ behavior:"smooth", block:"start" });
+});
+document.getElementById("inquiry-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = e.target;
+  const total = (CONFIG.sizePricing[state.size]||0) + (state.framed ? CONFIG.framePrice : 0);
+  const details = { name:f.name.value, contact:f.contact.value, message:f.message.value, type:state.type, size:state.size, presentation: state.framed ? "Zarámované" : "Bez rámu", estimatedPrice: fmt(total)+" Kč" };
+  if (CONFIG.formEndpoint) {
+    try {
+      await fetch(CONFIG.formEndpoint, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(details) });
+      f.hidden = true;
+      document.getElementById("inquiry-sent").hidden = false;
+    } catch (err) {
+      alert("Poptávku se nepodařilo odeslat — zkuste to prosím znovu nebo napište přímo na e-mail.");
+    }
+  } else {
+    const body = `Jméno: ${details.name}\nKontakt: ${details.contact}\n\nTyp obrazu: ${details.type}\nVelikost: ${details.size}\nProvedení: ${details.presentation}\nOrientační cena: ${details.estimatedPrice}\n\nZpráva:\n${details.message}`;
+    window.location.href = `mailto:${CONFIG.email}?subject=${encodeURIComponent("Poptávka na obraz")}&body=${encodeURIComponent(body)}`;
+  }
+});
+</script>
+</body>
+</html>
