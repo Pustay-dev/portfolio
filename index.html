@@ -45,6 +45,12 @@ nav a{ font-size:.72rem; letter-spacing:.09em; text-transform:uppercase; color:v
 nav a.active{ color:var(--ink); border-bottom:1px solid var(--ink); }
 
 main > section{ padding:40px var(--pad) calc(70px + env(safe-area-inset-bottom,0px)); max-width:1400px; margin:0 auto; }
+#portfolio{ padding-top:20px; }
+
+/* Portfolio filter */
+.filter{ display:flex; justify-content:center; gap:18px; margin-bottom:16px; }
+.filter-btn{ font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--meta); padding-bottom:2px; }
+.filter-btn.active{ color:var(--ink); border-bottom:1px solid var(--ink); }
 
 /* Portfolio grid */
 .grid{ column-count:3; column-gap:20px; }
@@ -53,6 +59,7 @@ main > section{ padding:40px var(--pad) calc(70px + env(safe-area-inset-bottom,0
 .artwork{ break-inside:avoid; margin-bottom:20px; position:relative; cursor:pointer; }
 @media (max-width:480px){ .artwork{ margin-bottom:12px; } }
 .artwork img{ width:100%; height:auto; }
+.grid.hide-sold .artwork[data-status="sold"]{ display:none; }
 .artwork .overlay{
   position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-end;
   padding:16px; opacity:0; transition:opacity .18s ease; background:rgba(255,255,255,0);
@@ -65,15 +72,13 @@ main > section{ padding:40px var(--pad) calc(70px + env(safe-area-inset-bottom,0
 .overlay .sold{ color:var(--faint); }
 
 /* Lightbox */
-.lightbox{ position:fixed; inset:0; background:#fff; z-index:100; display:none; overflow-y:auto; }
+.lightbox{ position:fixed; inset:0; height:100vh; height:100dvh; background:#fff; z-index:100; display:none; overflow-y:auto; }
 .lightbox.open{ display:flex; align-items:center; justify-content:center; animation:fadein .2s ease; }
 @keyframes fadein{ from{opacity:0} to{opacity:1} }
 .lb-close{ position:fixed; top:calc(18px + env(safe-area-inset-top,0px)); right:20px; font-size:1.6rem; line-height:1; z-index:102; }
 .lb-content{ max-width:900px; width:100%; padding:60px 24px 40px; text-align:center; }
 .lb-img-wrap{ position:relative; display:inline-block; max-width:100%; }
 .lb-img-wrap img{ max-height:70vh; display:block; margin:0 auto 22px; transition:opacity .25s ease; }
-.lb-spinner{ display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:26px; height:26px; border:2px solid var(--line); border-top-color:var(--ink); border-radius:50%; animation:spin .7s linear infinite; }
-@keyframes spin{ to{ transform:translate(-50%,-50%) rotate(360deg); } }
 .lb-arrow{
   position:absolute; top:50%; transform:translateY(-50%);
   width:34px; height:34px; display:flex; align-items:center; justify-content:center;
@@ -115,7 +120,6 @@ main > section{ padding:40px var(--pad) calc(70px + env(safe-area-inset-bottom,0
 .step-title{ font-size:.9rem; margin-bottom:3px; }
 .step-desc{ font-size:.8rem; color:var(--meta); line-height:1.4; }
 
-
 /* Contact */
 #contact p{ text-align:center; font-size:1rem; margin:10px 0; }
 .ig-link{ display:inline-flex; align-items:center; gap:8px; }
@@ -134,7 +138,13 @@ main > section{ padding:40px var(--pad) calc(70px + env(safe-area-inset-bottom,0
 </header>
 
 <main>
-  <section id="portfolio"><div class="grid" id="grid"></div></section>
+  <section id="portfolio">
+    <div class="filter" id="portfolio-filter">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="available">Available</button>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
 
   <section id="commissions" hidden>
     <p class="intro">Original oil paintings made from your photograph.</p>
@@ -173,7 +183,6 @@ main > section{ padding:40px var(--pad) calc(70px + env(safe-area-inset-bottom,0
   <button class="lb-close" id="lb-close" aria-label="Close">×</button>
   <div class="lb-content">
     <div class="lb-img-wrap">
-      <div class="lb-spinner" id="lb-spinner"></div>
       <img id="lb-img" alt="">
       <button class="lb-arrow lb-prev" id="lb-prev" aria-label="Previous image" style="display:none;">‹</button>
       <button class="lb-arrow lb-next" id="lb-next" aria-label="Next image" style="display:none;">›</button>
@@ -201,50 +210,41 @@ const CONFIG = {
   framePrice: 1500
 };
 
-// ---------- Sample artwork data (replace with real paintings) ----------
-const ph = (w,h,bg) => "data:image/svg+xml;utf8," + encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="${bg}"/></svg>`);
-
 // ---------- Your paintings ----------
 // Add a painting by adding one object to this array. Fields:
 //   id          unique short id (letters/numbers/dashes, used internally only)
 //   title, year, medium, dimensions   shown as text in the grid and popup
 //   price       number in CZK — leave this field out entirely to show no price
 //   status      "available" or "sold" — sold paintings hide price and Buy now
-//   thumb       optional — a smaller, lighter image just for the grid.
-//               Leave it out and the grid uses images[0] instead.
-//   images      list of full-size photo URLs, first one is the popup's first image.
+//   images      list of photo URLs, first one is the grid thumbnail and popup's first image.
 //               One photo or several (viewer can swipe/arrow between them).
-// Once hosted, point these at your real (compressed!) files, e.g.:
-//   { ..., thumb:"images/new-piece-thumb.jpg",
-//     images:["images/new-piece-1.jpg","images/new-piece-2.jpg"] }
 const artworks = [
   { id:"albatros", title:"Albatros 498.1", year:2026, medium:"Oil on canvas", dimensions:"50 × 40 cm", status:"sold",
-    images:["images/albatraz.jpeg"], thumb:"images/compresed/albatraz Large.jpeg"},
+    images:["images/compresed/albatraz Large.jpeg"] },
   { id:"omar", title:"HUGE family portrait", year:2026, medium:"Oil on canvas", dimensions:"140 × 135 cm", status:"sold",
-    images:["images/omar_original.jpg", "images/omar_lifesize.jpg", "images/omar_watch.jpg", "images/omar_detail1.jpg", "images/omar_detail2.jpg", "images/omar_down.jpg"], thumb:"images/compresed/omar_original Large.jpeg" },
+    images:["images/compresed/omar_original Large.jpeg", "images/omar_lifesize.jpg", "images/omar_watch.jpg", "images/omar_detail1.jpg", "images/omar_detail2.jpg", "images/omar_down.jpg"] },
   { id:"persik", title:"Perseus", year:2026, medium:"Oil on panel", dimensions:"24 × 30 cm", price:5000, status:"available",
-    images:["images/persik.jpg"], thumb:"images/compresed/persik Large.jpeg" },
+    images:["images/compresed/persik Large.jpeg"] },
   { id:"shaker", title:"barman vibe", year:2025, medium:"Oil on canvas", dimensions:"50 × 50 cm", status:"sold",
-    images:["images/shaker.jpg"], thumb:"images/compresed/shaker Large.jpeg" },
+    images:["images/compresed/shaker Large.jpeg"] },
   { id:"nero", title:"Nero", year:2026, medium:"Oil on panel", dimensions:"24 × 30 cm", price:5000, status:"available",
-    images:["images/nero.jpg"], thumb:"images/compresed/nero Large.jpeg" },
+    images:["images/compresed/nero Large.jpeg"] },
   { id:"meggie", title:"Maggie", year:2026, medium:"Oil on canvas", dimensions:"25 × 30 cm", status:"sold",
-    images:["images/meggie.jpeg"], thumb:"images/compresed/meggie Large.jpeg" },
+    images:["images/compresed/meggie Large.jpeg"] },
   { id:"jeseniky", title:"Jesenické hory", year:2026, medium:"Oil on canvas", dimensions:"45 × 35 cm", price:10000, status:"available",
-    images:["images/jeseniky.jpg"], thumb:"images/compresed/jeseniky Large.jpeg" },
+    images:["images/compresed/jeseniky Large.jpeg"] },
   { id:"jesus", title:"son of a god", year:2026, medium:"Oil on panel", dimensions:"24 × 30 cm", price:5000, status:"available",
-    images:["images/jesus.jpg"], thumb:"images/compresed/jesus Large.jpeg" },
+    images:["images/compresed/jesus Large.jpeg"] },
   { id:"duck", title:"celebratory lunch", year:2026, medium:"Oil on panel", dimensions:"30 × 24 cm", status:"sold",
-    images:["images/duck.jpeg"], thumb:"images/compresed/duck Large.jpeg" },
+    images:["images/compresed/duck Large.jpeg"] },
   { id:"cillian", title:"peaky blinders", year:2024, medium:"Oil on canvas", dimensions:"25 × 30 cm", price:5000, status:"available",
-    images:["images/murphy.jpg"], thumb:"images/compresed/murphy Large.jpeg" },
+    images:["images/compresed/murphy Large.jpeg"] },
   { id:"bradpit", title:"fight club", year:2024, medium:"Oil on panel", dimensions:"24 × 30 cm", price:5000, status:"available",
-    images:["images/bradpit.jpg"], thumb:"images/compresed/bradpit Large.jpeg" },
+    images:["images/compresed/bradpit Large.jpeg"] },
   { id:"zofie", title:"Zophy", year:2026, medium:"Oil on canvas", dimensions:"30 × 24 cm", status:"sold",
-    images:["images/zofie.jpg"], thumb:"images/compresed/zofie Large.jpeg" },
+    images:["images/compresed/zofie Large.jpeg"] },
   { id:"anna", title:"Anna", year:2025, medium:"Oil on canvas", dimensions:"25 × 30 cm", status:"sold",
-    images:["images/ana.jpg"], thumb:"images/compresed/ana Large.jpeg" }
+    images:["images/compresed/ana Large.jpeg"] }
 ];
 
 const fmt = n => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
@@ -255,8 +255,9 @@ artworks.forEach(a => {
   const el = document.createElement("div");
   el.className = "artwork"; el.tabIndex = 0; el.setAttribute("role","button");
   el.setAttribute("aria-label", `${a.title}, ${a.year}`);
+  el.dataset.status = a.status;
   const img = document.createElement("img");
-  img.src = a.thumb || a.images[0]; img.loading = "lazy";
+  img.src = a.images[0]; img.loading = "lazy";
   img.alt = `${a.title}, oil painting by Jakub Pustay, ${a.year}`;
   const overlay = document.createElement("div");
   overlay.className = "overlay";
@@ -268,6 +269,15 @@ artworks.forEach(a => {
   el.addEventListener("click", () => openLightbox(a));
   el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(a); } });
   grid.appendChild(el);
+});
+
+// ---------- Portfolio filter ----------
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    grid.classList.toggle("hide-sold", btn.dataset.filter === "available");
+  });
 });
 
 // ---------- Lightbox ----------
@@ -289,11 +299,9 @@ function openLightbox(a){
 }
 function renderImg(){
   const img = document.getElementById("lb-img");
-  const spinner = document.getElementById("lb-spinner");
   img.style.opacity = "0";
-  spinner.style.display = "block";
-  img.onload = () => { spinner.style.display = "none"; img.style.opacity = "1"; };
-  img.onerror = () => { spinner.style.display = "none"; img.style.opacity = "1"; };
+  img.onload = () => { img.style.opacity = "1"; };
+  img.onerror = () => { img.style.opacity = "1"; };
   img.src = current.images[idx];
   img.alt = `${current.title}, oil painting by Jakub Pustay, ${current.year}`;
 }
